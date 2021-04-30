@@ -128,7 +128,7 @@ module optmult
             booth (
               .I0(1'b0),
               .I1(A[rho][i]),
-              .I2(rho ? B[rho][2*rho-1] : 1'b0),
+              .I2(rho != 0 ? B[rho][2*rho-1] : 1'b0),
               .I3(B[rho][2*rho]),
               .I4(B[rho][2*rho+1]),
               .I5(x_in[rho][i+2]),
@@ -142,7 +142,7 @@ module optmult
             booth_msb (
               .I0(x_in[rho][i+1]),
               .I1(A[rho][i-1]),
-              .I2(rho ? B[rho][2*rho-1] : 1'b0),
+              .I2(rho != 0 ? B[rho][2*rho-1] : 1'b0),
               .I3(B[rho][2*rho]),
               .I4(B[rho][2*rho+1]),
               .I5(1'b1),
@@ -156,7 +156,7 @@ module optmult
             booth (
               .I0(A[rho][i-1]),
               .I1(A[rho][i]),
-              .I2(rho ? B[rho][2*rho-1] : 1'b0),
+              .I2(rho != 0 ? B[rho][2*rho-1] : 1'b0),
               .I3(B[rho][2*rho]),
               .I4(B[rho][2*rho+1]),
               .I5(x_in[rho][i+2]),

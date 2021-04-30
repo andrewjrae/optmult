@@ -119,7 +119,7 @@ module LUT6_2 #(
 
  always @(I0 or I1 or I2 or I3 or I4)  begin
    if ( (I0 ^ I1 ^ I2 ^ I3 ^ I4) === 1'b0 || (I0 ^ I1 ^ I2 ^ I3 ^ I4) === 1'b1)
-     O5_out = INIT_REG[{I4, I3, I2, I1, I0}];
+     O5_out = INIT_REG[{1'b0, I4, I3, I2, I1, I0}];
    else if ( ~(|INIT_REG[31:0]) || &INIT_REG[31:0] )
      O5_out = INIT_REG[0];
    else
