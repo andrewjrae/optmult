@@ -9,40 +9,48 @@ module mult_tb
 
   reg rst;
 
-`ifdef SIGNED
-  reg [M_W-1:0] in_a;
-  reg [N_W-1:0] in_b;
-  wire signed [M_W-1:0] out_a;
-  wire signed [N_W-1:0] out_b;
-  wire signed [M_W+N_W-1:0] mult;
-  reg  signed [M_W+N_W-1:0] result;
+  localparam N_ODD = N_W % 2 == 1;
+`ifdef _UNSIGNED
+  localparam NX = N_ODD ? N_W + 1 : N_W + 2;
 `else
+  localparam NX = N_ODD ? N_W + 1 : N_W;
+`endif
+  localparam NUM_PIPES = (NX/2+1)/2;
+
+`ifdef _UNSIGNED
   reg [M_W-1:0] in_a;
   reg [N_W-1:0] in_b;
   wire unsigned [M_W-1:0] out_a;
   wire unsigned [N_W-1:0] out_b;
   wire unsigned [M_W+N_W-1:0] mult;
   reg  unsigned [M_W+N_W-1:0] result;
+`else
+  reg [M_W-1:0] in_a;
+  reg [N_W-1:0] in_b;
+  wire signed [M_W-1:0] out_a;
+  wire signed [N_W-1:0] out_b;
+  wire signed [M_W+N_W-1:0] mult;
+  reg  signed [M_W+N_W-1:0] result;
 `endif
 
-  pipe_reg #(.REG_W(M_W), .PIP_D(3))
+  pipe_reg #(.REG_W(M_W), .PIP_D(NUM_PIPES))
     pipe_a (
       .clk(clk),
       .rst(rst),
       .in(in_a),
       .out(out_a));
 
-  pipe_reg #(.REG_W(N_W), .PIP_D(3))
+  pipe_reg #(.REG_W(N_W), .PIP_D(NUM_PIPES))
     pipe_b (
       .clk(clk),
       .rst(rst),
       .in(in_b),
       .out(out_b));
 
-`ifdef SIGNED
-  optmult #(.UNSIGNED(0), .N_W(N_W), .M_W(M_W))
-`else
+`ifdef _UNSIGNED
   optmult #(.UNSIGNED(1), .N_W(N_W), .M_W(M_W))
+`else
+  optmult #(.UNSIGNED(0), .N_W(N_W), .M_W(M_W))
 `endif
     mult_inst (
       .clk(clk),
@@ -77,7 +85,7 @@ module mult_tb
 
 `ifdef END
   wire done;
-  assign done = out_a == END-1;
+  assign done = out_a == `END-1;
 `endif
 
   always @(posedge clk) begin
@@ -86,9 +94,15 @@ module mult_tb
       $finish;
     end
 `ifdef END
-    if (done) $finish;
+    if (done) begin
+      $display("Testbench completed successfully!");
+      $finish;
+    end
 `endif
-    if (out_a == {M_W{1'b1}}) $finish;
+    if (out_a == {M_W{1'b1}} && out_b == {N_W{1'b1}}) begin
+      $display("Testbench completed successfully!");
+      $finish;
+    end
   end
 
 endmodule // mult_tb
