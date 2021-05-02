@@ -21,6 +21,8 @@ There are two implementations in this repo, the pipelined version, and the unpip
 
 [[figures/figure11_corrected.png]]
 
+All the LUT6_2, MUXCY, and XORCY implementations are here only for the testbench, when compiling with Vivado you should not need them.
+
 Both implementations support =MxN= multiplication, where =M= is the number of bits in the first input (input =a=), and =N= is the number of bits in the second input (input =b=). Note that these bit lengths have some restrictions to them, for example for unsigned multipliers, the =M= data width has to be one bit wider, and the =N= data width has to be two bits wider if it was even.
 So for the =8x8= multiplier I needed for the project, the actual =M= and =N= was =9x10=, regardless, the design was still smaller than the LOGICore =8x8= unsigned multiplier.
 
@@ -29,3 +31,8 @@ The paper outlines three main implementation options: single cycle (no pipelinin
 I had initially only implemented the single cycle version, but it is significantly slower than the LOGICore single core multiplier and could barely go over 100 MHz. However, since I was already using DSPs which had up to three pipeline stages in a different processing element, using the =N/4= design made the most sense to speed up the design. The reason being that since the effective =N= for my multiplier is 10 the number of pipeline stages is 3 (since we round up), making it easy and efficient for both processing elements to use the same pipelining depth.
 
 *  Testbench
+The test bench can be run with the [[file:Makefile][Makefile]], simply running =make= will run through all possible input combinations for the pipelined, signed =8x8= multiplier.
+
+To run with different data widths, you can use the =N= and =M= variables, ie =make N=16 M=16= will run with signed 16x16 multipliers, however due to the size of 16 bit numbers, you will likely want to set an early end point using =make N=16 M=16 END=512=.
+
+You can test unsigned multiplication using =U=1=.
