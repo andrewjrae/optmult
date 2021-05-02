@@ -1,0 +1,31 @@
+#+TITLE: Optimized Softlogic Multiplier
+
+* About
+This project is an implementation of a highly efficient multiplier module for Xilinx FPGAs. The implementation is based off of [[https://www.mdpi.com/2073-431X/5/4/20/pdf][this paper]] which optimizes for Xilinx's 6 to 2 LUTs. It uses less LUTs than Xilinx's default LOGICore multiplier and can be pipelined to the speeds of the LOGICore multiplier.
+
+This was implemented for Prof. Nachiket Kapre's ECE 327 design competition, where students compete to create the highest throughput systolic array. This multiplier was a key component of my design, allowing it to run a larger array at faster speeds (when pipelined).
+
+This is the leader board from the past four terms of the course all implemented on the PYNQ-Z1 SoC board.
+| Term                  | Size of Array | Clock Frequency |
+|-----------------------+---------------+-----------------|
+| Winter 2019           |         25x25 | 115 MHz         |
+| Spring 2019           |         29x29 | 111 MHz         |
+| Fall 2019             |         27x27 | 142 MHz         |
+| Spring 2020 (my year) |         29x29 | 200 MHz         |
+It should be noted that the systolic arrays had to be square.
+
+As you can see, this multiplier allowed for much higher clock speeds even with a such a large array. I would also like to note however that another student implemented this paper and was able to achieve the same 29x29 at 200 MHz speed as I did.
+
+* Implementation
+There are two implementations in this repo, the pipelined version, and the unpipelined version, [[file:optmult.sv][optmult.sv]] and [[file:optmult_nopipe.sv][optmult_nopipe.sv]] respectively. The implementation are quite similar, aside from the pipelining, and both make use of the notation from the paper, this is easiest seen in Figure 11 of the paper, however there is a small typo in this figure, which I have corrected below.
+
+[[figures/figure11_corrected.png]]
+
+Both implementations support =MxN= multiplication, where =M= is the number of bits in the first input (input =a=), and =N= is the number of bits in the second input (input =b=). Note that these bit lengths have some restrictions to them, for example for unsigned multipliers, the =M= data width has to be one bit wider, and the =N= data width has to be two bits wider if it was even.
+So for the =8x8= multiplier I needed for the project, the actual =M= and =N= was =9x10=, regardless, the design was still smaller than the LOGICore =8x8= unsigned multiplier.
+
+The paper outlines three main implementation options: single cycle (no pipelining), =N/2= pipelining, =N/4= pipelining. Here, only the single cycle and =N/4= pipelining is implemented, =N/4= pipelining means that there are =N/4= (rounded up) pipeline stages.
+
+I had initially only implemented the single cycle version, but it is significantly slower than the LOGICore single core multiplier and could barely go over 100 MHz. However, since I was already using DSPs which had up to three pipeline stages in a different processing element, using the =N/4= design made the most sense to speed up the design. The reason being that since the effective =N= for my multiplier is 10 the number of pipeline stages is 3 (since we round up), making it easy and efficient for both processing elements to use the same pipelining depth.
+
+*  Testbench
